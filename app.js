@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.static('service'));
 app.use(fileUpload());
 
-const PORT = process.env.PORT || 4000;
+
 
 
 const MongoClient = require('mongodb').MongoClient;
@@ -80,47 +80,34 @@ client.connect(err => {
          })
    });
 
-  
    app.get('/all-services', (req, res) => {
       serviceCollection.find({})
          .toArray((err, sDocument) => {
          res.send(sDocument)
       })
    });
+
    app.post('/add-service', (req, res) => {
       const file = req.files.file;
       const title = req.body.title;
       const description = req.body.description;      
-      const filePath = `${__dirname}/service/${file.name}`;
-      
-      file.mv(filePath, err => {
-         if (err) {
-            console.log(err);
-            res.status(500).send({ mgs: "Failed to upload image" })
-         }
-         const newImg = fs.readFileSync(filePath);
+      const newImg = file.data;
          const encImg = newImg.toString('base64');
          let image = {
             contentType: req.files.file.mimetype,
             size: req.files.file.size,
-            img: Buffer(encImg, 'base64')
+            img: Buffer.from(encImg, 'base64')
          };
          serviceCollection.insertOne({ title, description, image })
             .then(result => {
-               fs.remove(filePath, error => {
-                  if (error) {
-                     console.log(error);
-                     res.status(500).send({ mgs: "Failed to upload image" })
-                  }
-                  res.send(result.insertedCount > 0);
-               })
+               res.send(result.insertedCount > 0);
+               
             })
-      })
    });
 
 });
 
-
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
    console.log(`Server connected on port ${PORT}`);
 });
