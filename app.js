@@ -90,9 +90,7 @@ client.connect(err => {
    app.post('/add-service', (req, res) => {
       const file = req.files.file;
       const title = req.body.title;
-      const description = req.body.description;
-      console.log(file, title, description);
-      
+      const description = req.body.description;      
       const filePath = `${__dirname}/service/${file.name}`;
       
       file.mv(filePath, err => {
